@@ -5,7 +5,7 @@
 
 void radix_sort(int *arr, int n, int *temp, int k, int *result);
 void counting_sort_wrt_digit(int *arr, int n, int *temp, int k, int *result, int d);
-int get_digit(int num, int digit);
+int get_digit(int num, int exp, int k);
 
 int main(void) {
     int arr[] = {170, 45, 2375, 90, 802, 24, 2, 66};
@@ -13,7 +13,7 @@ int main(void) {
     int result[N], temp[K];
     radix_sort(arr, n, temp, K, result);
     for (int i = 0; i < n; i++) {
-        printf("%d ", result[i]);
+        printf("%d ", arr[i]);
     }
     printf("\n");
     return 0;
@@ -26,7 +26,7 @@ void radix_sort(int *arr, int n, int *temp, int k, int *result) {
     for (int i = 0; i < n; i++) if (arr[i] > max) max = arr[i];
     // Find for how many digits we execute the loop
     int max_digits;
-    for (max_digits = 1; max / 10 > 0; max /= 10) max_digits++;
+    for (max_digits = 1; max / k > 0; max /= k) max_digits++;
     // Loop and sort for each digit, i=0 represents units, 1 represents ones ...
     for (int i = 0; i < max_digits; i++) {
         counting_sort_wrt_digit(arr, n, temp, k, result, i);
@@ -34,21 +34,22 @@ void radix_sort(int *arr, int n, int *temp, int k, int *result) {
 }
 
 void counting_sort_wrt_digit(int *arr, int n, int *temp, int k, int *result, int d) {
+    int exp = 1;
+    for (int i = 0; i < d; i++) exp *= k;
     for (int i = 0; i < k; i++) temp[i] = 0;
     for (int i = 0; i < n; i++) {
-        int digit = get_digit(arr[i], d);
+        int digit = get_digit(arr[i], exp, k);
         temp[digit]++;
     }
     for (int i = 1; i < k; i++) temp[i] += temp[i - 1];
     for (int i = n - 1; i >= 0; i--) {
-        int digit = get_digit(arr[i], d);
+        int digit = get_digit(arr[i], exp, k);
         result[temp[digit] - 1] = arr[i];
         temp[digit]--;
     }
     for (int i = 0; i < n; i++) arr[i] = result[i];
 }
 
-int get_digit(int num, int digit) {
-    for (int i = 0; i < digit; i++) num /= 10;
-    return num % 10;
+int get_digit(int num, int exp, int k) {
+    return (num / exp) % k;
 }
